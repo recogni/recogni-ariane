@@ -3,6 +3,15 @@ ariane:
     include,
   ]
   files: [
+    src/util/exception_trace_item.svh,
+    src/util/instruction_trace_item.svh,
+    src/util/instruction_tracer_defines.svh,
+    src/util/instruction_tracer.svh,
+    src/util/instruction_tracer_pkg.sv,
+    src/util/instruction_tracer_if.sv,
+    src/tech_cells_generic/src/cluster_clock_gating.sv,
+    tb/common/mock_uart.sv,
+    src/util/sram.sv,
     include/riscv_pkg.sv,
     src/debug/dm_pkg.sv,
     include/ariane_pkg.sv,
@@ -34,7 +43,7 @@ ariane:
     src/ex_stage.sv,
     src/fpu_wrap.sv,
     src/id_stage.sv,
-    src/instr_rea.sv,
+    src/instr_realigner.sv,
     src/fpu/src/utils/fp_arbiter.vhd,
     src/fpu/src/utils/fp_pipe.vhd,
     src/fpu/src/utils/fp_rounding.vhd,
@@ -104,7 +113,7 @@ ariane:
     src/axi_node/src/axi_address_decoder_BW.sv,
     src/axi_node/src/axi_address_decoder_DW.sv,
     src/axi_node/src/axi_AR_allocator.sv,
-    src/axi_node/src/axi_ArbitrationTree.sv,src/plic/
+    src/axi_node/src/axi_ArbitrationTree.sv,
     src/axi_node/src/axi_AW_allocator.sv,
     src/axi_node/src/axi_BR_allocator.sv,
     src/axi_node/src/axi_BW_allocator.sv,
