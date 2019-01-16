@@ -10,6 +10,8 @@ ver-library    ?= work-ver
 dpi-library    ?= work-dpi
 # Top level module to compile
 top_level      ?= ariane_tb
+# Top level module to compile
+vopt_module    ?= $(top_level)_optimized
 # Maximum amount of cycles for a successful simulation run
 max_cycles     ?= 10000000
 # Test case to run
@@ -163,7 +165,7 @@ riscv-benchmarks          := $(shell xargs printf '\n%s' < $(riscv-benchmarks-li
 # Search here for include files (e.g.: non-standalone components)
 incdir :=
 # Compile and sim flags
-compile_flag     += +cover=bcfst+/dut -incr -64 -nologo -quiet -suppress 13262 -permissive +define+$(defines)
+compile_flag     += +cover=bcfst+/dut -incr -64 -nologo -quiet -suppress 13262 -suppress 3009 -permissive +define+$(defines)
 uvm-flags        += +UVM_NO_RELNOTES +UVM_VERBOSITY=LOW
 questa-flags     += -t 1ns -64 -coverage -classdebug $(gui-sim) $(QUESTASIM_FLAGS)
 compile_flag_vhd += -64 -nologo -quiet -2008
@@ -204,9 +206,12 @@ else
 endif
 
 # Build the TB and module using QuestaSim
+build_only: $(library) $(library)/.build-srcs $(library)/.build-tb $(dpi-library)/ariane_dpi.so
+
+# Build the TB and module using QuestaSim
 build: $(library) $(library)/.build-srcs $(library)/.build-tb $(dpi-library)/ariane_dpi.so
 	# Optimize top level
-	vopt$(questa_version) $(compile_flag) -work $(library)  $(top_level) -o $(top_level)_optimized +acc -check_synthesis
+	vopt$(questa_version) $(compile_flag) -work $(library)  $(top_level) -o $(vopt_module) +acc -check_synthesis
 
 # src files
 $(library)/.build-srcs: $(util) $(library)
@@ -245,27 +250,27 @@ $(dpi-library)/ariane_dpi.so: $(dpi)
 sim: build
 	vsim${questa_version} +permissive $(questa-flags) $(questa-cmd) -lib $(library) +MAX_CYCLES=$(max_cycles) +UVM_TESTNAME=$(test_case) \
 	+BASEDIR=$(riscv-test-dir) $(uvm-flags) $(QUESTASIM_FLAGS) -gblso $(RISCV)/lib/libfesvr.so -sv_lib $(dpi-library)/ariane_dpi        \
-	${top_level}_optimized +permissive-off ++$(elf-bin) ++$(target-options) | tee sim.log
+	${vopt_module} +permissive-off ++$(elf-bin) ++$(target-options) | tee sim.log
 
 $(riscv-asm-tests): build
 	vsim${questa_version} +permissive $(questa-flags) $(questa-cmd) -lib $(library) +max-cycles=$(max_cycles) +UVM_TESTNAME=$(test_case) \
 	+BASEDIR=$(riscv-test-dir) $(uvm-flags) +jtag_rbb_enable=0  -gblso $(RISCV)/lib/libfesvr.so -sv_lib $(dpi-library)/ariane_dpi        \
-	${top_level}_optimized $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) | tee tmp/riscv-asm-tests-$@.log
+	${vopt_module} $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) | tee tmp/riscv-asm-tests-$@.log
 
 $(riscv-amo-tests): build
 	vsim${questa_version} +permissive $(questa-flags) $(questa-cmd) -lib $(library) +max-cycles=$(max_cycles) +UVM_TESTNAME=$(test_case) \
 	+BASEDIR=$(riscv-test-dir) $(uvm-flags) +jtag_rbb_enable=0  -gblso $(RISCV)/lib/libfesvr.so -sv_lib $(dpi-library)/ariane_dpi        \
-	${top_level}_optimized $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) | tee tmp/riscv-amo-tests-$@.log
+	${vopt_module} $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) | tee tmp/riscv-amo-tests-$@.log
 
 $(riscv-mul-tests): build
 	vsim${questa_version} +permissive $(questa-flags) $(questa-cmd) -lib $(library) +max-cycles=$(max_cycles) +UVM_TESTNAME=$(test_case) \
     +BASEDIR=$(riscv-test-dir) $(uvm-flags) +jtag_rbb_enable=0  -gblso $(RISCV)/lib/libfesvr.so -sv_lib $(dpi-library)/ariane_dpi        \
-    ${top_level}_optimized $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) | tee tmp/riscv-amo-tests-$@.log
+    ${vopt_module} $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-test-dir)/$@ ++$(target-options) "+nowarnTSCALE" | tee tmp/riscv-amo-tests-$@.log
 
 $(riscv-benchmarks): build
 	vsim${questa_version} +permissive $(questa-flags) $(questa-cmd) -lib $(library) +max-cycles=$(max_cycles) +UVM_TESTNAME=$(test_case) \
 	+BASEDIR=$(riscv-benchmarks-dir) $(uvm-flags) +jtag_rbb_enable=0 -gblso $(RISCV)/lib/libfesvr.so -sv_lib $(dpi-library)/ariane_dpi   \
-	${top_level}_optimized $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-benchmarks-dir)/$@ ++$(target-options) | tee tmp/riscv-benchmarks-$@.log
+	${vopt_module} $(QUESTASIM_FLAGS) +permissive-off ++$(riscv-benchmarks-dir)/$@ ++$(target-options) | tee tmp/riscv-benchmarks-$@.log
 
 # can use -jX to run ci tests in parallel using X processes
 run-asm-tests: $(riscv-asm-tests)
