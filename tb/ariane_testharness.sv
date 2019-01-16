@@ -74,6 +74,8 @@ module ariane_testharness #(
 
     localparam AXI_ID_WIDTH_SLAVES = AXI_ID_WIDTH + $clog2(NB_SLAVE);
 
+    localparam AXI_BUFF_WIDTH_ASYNC = 8;
+
     AXI_BUS #(
         .AXI_ADDR_WIDTH ( AXI_ADDRESS_WIDTH ),
         .AXI_DATA_WIDTH ( AXI_DATA_WIDTH    ),
@@ -87,6 +89,14 @@ module ariane_testharness #(
         .AXI_ID_WIDTH   ( AXI_ID_WIDTH_SLAVES ),
         .AXI_USER_WIDTH ( AXI_USER_WIDTH      )
     ) master[ariane_soc::NB_PERIPHERALS-1:0]();
+
+    AXI_BUS_ASYNC #(
+        .AXI_ADDR_WIDTH ( AXI_ADDRESS_WIDTH    ),
+        .AXI_DATA_WIDTH ( AXI_DATA_WIDTH       ),
+        .AXI_ID_WIDTH   ( AXI_ID_WIDTH_SLAVES  ),
+        .AXI_USER_WIDTH ( AXI_USER_WIDTH       ),
+        .BUFFER_WIDTH   ( AXI_BUFF_WIDTH_ASYNC )
+    ) master_pulp();
 
     rstgen i_rstgen_main (
         .clk_i        ( clk_i                ),
@@ -446,22 +456,24 @@ module ariane_testharness #(
             ariane_soc::ROMBase,
             ariane_soc::CLINTBase,
             ariane_soc::PLICBase,
-            ariane_soc::UARTBase,
-            ariane_soc::SPIBase,
+            ariane_soc::GPIOBase,
+            ariane_soc::PULPBase,
             ariane_soc::EthernetBase,
             ariane_soc::GPIOBase,
-            ariane_soc::DRAMBase
+            ariane_soc::DRAMBase,
+            ariane_soc::UARTBase
         }),
         .end_addr_i   ({
             ariane_soc::DebugBase    + ariane_soc::DebugLength - 1,
             ariane_soc::ROMBase      + ariane_soc::ROMLength - 1,
             ariane_soc::CLINTBase    + ariane_soc::CLINTLength - 1,
             ariane_soc::PLICBase     + ariane_soc::PLICLength - 1,
-            ariane_soc::UARTBase     + ariane_soc::UARTLength - 1,
+            ariane_soc::PULPBase     + ariane_soc::PULPLenght - 1,
             ariane_soc::SPIBase      + ariane_soc::SPILength - 1,
             ariane_soc::EthernetBase + ariane_soc::EthernetLength -1,
             ariane_soc::GPIOBase     + ariane_soc::GPIOLength - 1,
-            ariane_soc::DRAMBase     + ariane_soc::DRAMLength - 1
+            ariane_soc::DRAMBase     + ariane_soc::DRAMLength - 1,
+            ariane_soc::UARTBase     + ariane_soc::UARTLength - 1
         })
     );
 
@@ -560,5 +572,370 @@ module ariane_testharness #(
     );
 
     axi_master_connect i_axi_master_connect_ariane (.axi_req_i(axi_ariane_req), .axi_resp_o(axi_ariane_resp), .master(slave[0]));
+
+
+
+
+/*
+    axi_slice_dc_slave
+    #(
+        .AXI_ADDR_WIDTH              ( AXI_ADDRESS_WIDTH                 ),
+        .AXI_DATA_WIDTH              ( AXI_DATA_WIDTH                    ),
+        .AXI_USER_WIDTH              ( AXI_USER_WIDTH                    ),
+        .AXI_ID_WIDTH                ( AXI_ID_WIDTH_SLAVES               ),
+        .BUFFER_WIDTH                ( AXI_BUFF_WIDTH_ASYNC              )
+    ) i_axi_slice_dc_slave
+    (
+        .clk_i                       ( clk_i                             ),
+        .rst_ni                      ( ndmreset_n                        ),
+
+        .test_cgbypass_i             ( 1'b0                              ),
+
+        .axi_slave_aw_valid          ( master[ariane_soc::PULP].aw_valid ),
+        .axi_slave_aw_addr           ( master[ariane_soc::PULP].aw_addr  ),
+        .axi_slave_aw_prot           ( master[ariane_soc::PULP].aw_prot  ),
+        .axi_slave_aw_region         ( master[ariane_soc::PULP].aw_region),
+        .axi_slave_aw_len            ( master[ariane_soc::PULP].aw_len   ),
+        .axi_slave_aw_size           ( master[ariane_soc::PULP].aw_size  ),
+        .axi_slave_aw_burst          ( master[ariane_soc::PULP].aw_burst ),
+        .axi_slave_aw_lock           ( master[ariane_soc::PULP].aw_lock  ),
+        .axi_slave_aw_cache          ( master[ariane_soc::PULP].aw_cache ),
+        .axi_slave_aw_qos            ( master[ariane_soc::PULP].aw_qos   ),
+        .axi_slave_aw_id             ( master[ariane_soc::PULP].aw_id    ),
+        .axi_slave_aw_user           ( master[ariane_soc::PULP].aw_user  ),
+        .axi_slave_aw_ready          ( master[ariane_soc::PULP].aw_ready ),
+
+        // READ ADDRESS CHANNEL
+        .axi_slave_ar_valid          ( master[ariane_soc::PULP].ar_valid ),
+        .axi_slave_ar_addr           ( master[ariane_soc::PULP].ar_addr  ),
+        .axi_slave_ar_prot           ( master[ariane_soc::PULP].ar_prot  ),
+        .axi_slave_ar_region         ( master[ariane_soc::PULP].ar_region),
+        .axi_slave_ar_len            ( master[ariane_soc::PULP].ar_len   ),
+        .axi_slave_ar_size           ( master[ariane_soc::PULP].ar_size  ),
+        .axi_slave_ar_burst          ( master[ariane_soc::PULP].ar_burst ),
+        .axi_slave_ar_lock           ( master[ariane_soc::PULP].ar_lock  ),
+        .axi_slave_ar_cache          ( master[ariane_soc::PULP].ar_cache ),
+        .axi_slave_ar_qos            ( master[ariane_soc::PULP].ar_qos   ),
+        .axi_slave_ar_id             ( master[ariane_soc::PULP].ar_id    ),
+        .axi_slave_ar_user           ( master[ariane_soc::PULP].ar_user  ),
+        .axi_slave_ar_ready          ( master[ariane_soc::PULP].ar_ready ),
+
+        // WRITE DATA CHANNEL
+        .axi_slave_w_valid           ( master[ariane_soc::PULP].w_valid  ),
+        .axi_slave_w_data            ( master[ariane_soc::PULP].w_data   ),
+        .axi_slave_w_strb            ( master[ariane_soc::PULP].w_strb   ),
+        .axi_slave_w_user            ( master[ariane_soc::PULP].w_user   ),
+        .axi_slave_w_last            ( master[ariane_soc::PULP].w_last   ),
+        .axi_slave_w_ready           ( master[ariane_soc::PULP].w_ready  ),
+
+        // READ DATA CHANNEL
+        .axi_slave_r_valid           ( master[ariane_soc::PULP].r_valid  ) ,
+        .axi_slave_r_data            ( master[ariane_soc::PULP].r_data   ) ,
+        .axi_slave_r_resp            ( master[ariane_soc::PULP].r_resp   ) ,
+        .axi_slave_r_last            ( master[ariane_soc::PULP].r_last   ) ,
+        .axi_slave_r_id              ( master[ariane_soc::PULP].r_id     ) ,
+        .axi_slave_r_user            ( master[ariane_soc::PULP].r_user   ) ,
+        .axi_slave_r_ready           ( master[ariane_soc::PULP].r_ready  ) ,
+
+        // WRITE RESPONSE CHANNEL
+        .axi_slave_b_valid           ( master[ariane_soc::PULP].b_valid   ),
+        .axi_slave_b_resp            ( master[ariane_soc::PULP].b_resp    ),
+        .axi_slave_b_id              ( master[ariane_soc::PULP].b_id      ),
+        .axi_slave_b_user            ( master[ariane_soc::PULP].b_user    ),
+        .axi_slave_b_ready           ( master[ariane_soc::PULP].b_ready   ),
+
+        // AXI4 MASTER
+        //***************************************
+        // WRITE ADDRESS CHANNEL
+        .axi_master_aw_addr          ( master_pulp.aw_addr                ),
+        .axi_master_aw_prot          ( master_pulp.aw_prot                ),
+        .axi_master_aw_region        ( master_pulp.aw_region              ),
+        .axi_master_aw_len           ( master_pulp.aw_len                 ),
+        .axi_master_aw_size          ( master_pulp.aw_size                ),
+        .axi_master_aw_burst         ( master_pulp.aw_burst               ),
+        .axi_master_aw_lock          ( master_pulp.aw_lock                ),
+        .axi_master_aw_cache         ( master_pulp.aw_cache               ),
+        .axi_master_aw_qos           ( master_pulp.aw_qos                 ),
+        .axi_master_aw_id            ( master_pulp.aw_id                  ),
+        .axi_master_aw_user          ( master_pulp.aw_user                ),
+        .axi_master_aw_writetoken    ( master_pulp.aw_writetoken          ),
+        .axi_master_aw_readpointer   ( master_pulp.aw_readpointer         ),
+        // READ ADDRESS CHANNEL
+        .axi_master_ar_addr          ( master_pulp.ar_addr                ),
+        .axi_master_ar_prot          ( master_pulp.ar_prot                ),
+        .axi_master_ar_region        ( master_pulp.ar_region              ),
+        .axi_master_ar_len           ( master_pulp.ar_len                 ),
+        .axi_master_ar_size          ( master_pulp.ar_size                ),
+        .axi_master_ar_burst         ( master_pulp.ar_burst               ),
+        .axi_master_ar_lock          ( master_pulp.ar_lock                ),
+        .axi_master_ar_cache         ( master_pulp.ar_cache               ),
+        .axi_master_ar_qos           ( master_pulp.ar_qos                 ),
+        .axi_master_ar_id            ( master_pulp.ar_id                  ),
+        .axi_master_ar_user          ( master_pulp.ar_user                ),
+        .axi_master_ar_writetoken    ( master_pulp.ar_writetoken          ),
+        .axi_master_ar_readpointer   ( master_pulp.ar_readpointer         ),
+
+        // WRITE DATA CHANNEL
+        .axi_master_w_data           ( master_pulp.w_data                 ),
+        .axi_master_w_strb           ( master_pulp.w_strb                 ),
+        .axi_master_w_user           ( master_pulp.w_user                 ),
+        .axi_master_w_last           ( master_pulp.w_last                 ),
+        .axi_master_w_writetoken     ( master_pulp.w_writetoken           ),
+        .axi_master_w_readpointer    ( master_pulp.w_readpointer          ),
+
+        // READ DATA CHANNEL
+        .axi_master_r_data           ( master_pulp.r_data                 ),
+        .axi_master_r_resp           ( master_pulp.r_resp                 ),
+        .axi_master_r_last           ( master_pulp.r_last                 ),
+        .axi_master_r_id             ( master_pulp.r_id                   ),
+        .axi_master_r_user           ( master_pulp.r_user                 ),
+        .axi_master_r_writetoken     ( master_pulp.r_writetoken           ),
+        .axi_master_r_readpointer    ( master_pulp.r_readpointer          ),
+
+        // WRITE RESPONSE CHANNEL
+        .axi_master_b_resp           ( master_pulp.b_resp                 ),
+        .axi_master_b_id             ( master_pulp.b_id                   ),
+        .axi_master_b_user           ( master_pulp.b_user                 ),
+        .axi_master_b_writetoken     ( master_pulp.b_writetoken           ),
+        .axi_master_b_readpointer    ( master_pulp.b_readpointer          )
+    );
+*/
+
+
+    // -------------
+    // Request Side
+    // -------------
+    axi_slice_dc_slave_wrap
+    #(
+        .AXI_ADDR_WIDTH              ( AXI_ADDRESS_WIDTH                 ),
+        .AXI_DATA_WIDTH              ( AXI_DATA_WIDTH                    ),
+        .AXI_USER_WIDTH              ( AXI_USER_WIDTH                    ),
+        .AXI_ID_WIDTH                ( AXI_ID_WIDTH_SLAVES               ),
+        .BUFFER_WIDTH                ( AXI_BUFF_WIDTH_ASYNC              )
+    ) i_axi_slice_dc_slave
+    (
+
+      .clk_i                 ( clk_i                    ),
+      .rst_ni                ( ndmreset_n               ),
+      .test_cgbypass_i       ( 1'b0                     ),
+      .isolate_i             ( 1'b0                     ),
+      .axi_slave             ( master[ariane_soc::PULP] ),
+      .axi_master_async      ( master_pulp              )
+    );
+
+    pulp_soc #(
+        .CORE_TYPE          ( 0                      ),
+        .USE_FPU            ( 0                      ),
+        .AXI_ADDR_WIDTH     ( 32                     ),
+        .AXI_DATA_IN_WIDTH  ( 64                     ),
+        .AXI_DATA_OUT_WIDTH ( 32                     ),
+        .AXI_ID_IN_WIDTH    ( AXI_ID_WIDTH_SLAVES    ),
+        .AXI_ID_OUT_WIDTH   ( 4                      ), //6???
+        .AXI_USER_WIDTH     ( 1                      ),
+        .AXI_STRB_WIDTH_IN  ( 64/8                   ),
+        .AXI_STRB_WIDTH_OUT ( 32/8                   )
+    ) i_pulp_soc
+    (
+      .ref_clk_i                     ( clk_i ),
+      .slow_clk_i                    ( 1'b0  ),
+      .test_clk_i                    ( 1'b0  ),
+      .rstn_glob_i                   ( rst_ni ),
+
+      .sel_fll_clk_i                 ( 1'b0 ),
+
+      .dft_test_mode_i               ( 1'b0 ),
+      .dft_cg_enable_i               ( 1'b0 ),
+      .mode_select_i                 ( 1'b0 ),
+      .soc_jtag_reg_i                ( '0   ),
+      .soc_jtag_reg_o                (      ),
+      .boot_l2_i                     ( 1'b0 ),
+
+      .cluster_rtc_o                 ( ), //KEEP OPEN
+      .cluster_fetch_enable_o        ( ), //KEEP OPEN
+      .cluster_boot_addr_o           ( ), //KEEP OPEN
+      .cluster_test_en_o             ( ), //KEEP OPEN
+      .cluster_pow_o                 ( ), //KEEP OPEN
+      .cluster_byp_o                 ( ), //KEEP OPEN
+      .cluster_rstn_o                ( ), //KEEP OPEN
+      .cluster_irq_o                 ( ), //KEEP OPEN
+
+      // AXI4 SLAVE
+      .data_slave_aw_writetoken_i    ( master_pulp.aw_writetoken   ),
+      .data_slave_aw_addr_i          ( master_pulp.aw_addr[31:0]   ),
+      .data_slave_aw_prot_i          ( master_pulp.aw_prot         ),
+      .data_slave_aw_region_i        ( master_pulp.aw_region       ),
+      .data_slave_aw_len_i           ( master_pulp.aw_len          ),
+      .data_slave_aw_size_i          ( master_pulp.aw_size         ),
+      .data_slave_aw_burst_i         ( master_pulp.aw_burst        ),
+      .data_slave_aw_lock_i          ( master_pulp.aw_lock         ),
+      .data_slave_aw_cache_i         ( master_pulp.aw_cache        ),
+      .data_slave_aw_qos_i           ( master_pulp.aw_qos          ),
+      .data_slave_aw_id_i            ( master_pulp.aw_id           ),
+      .data_slave_aw_user_i          ( master_pulp.aw_user         ),
+      .data_slave_aw_readpointer_o   ( master_pulp.aw_readpointer  ),
+      .data_slave_ar_writetoken_i    ( master_pulp.ar_writetoken   ),
+      .data_slave_ar_addr_i          ( master_pulp.ar_addr[31:0]   ),
+      .data_slave_ar_prot_i          ( master_pulp.ar_prot         ),
+      .data_slave_ar_region_i        ( master_pulp.ar_region       ),
+      .data_slave_ar_len_i           ( master_pulp.ar_len          ),
+      .data_slave_ar_size_i          ( master_pulp.ar_size         ),
+      .data_slave_ar_burst_i         ( master_pulp.ar_burst        ),
+      .data_slave_ar_lock_i          ( master_pulp.ar_lock         ),
+      .data_slave_ar_cache_i         ( master_pulp.ar_cache        ),
+      .data_slave_ar_qos_i           ( master_pulp.ar_qos          ),
+      .data_slave_ar_id_i            ( master_pulp.ar_id           ),
+      .data_slave_ar_user_i          ( master_pulp.ar_user         ),
+      .data_slave_ar_readpointer_o   ( master_pulp.ar_readpointer  ),
+      .data_slave_w_writetoken_i     ( master_pulp.w_writetoken    ),
+      .data_slave_w_data_i           ( master_pulp.w_data          ),
+      .data_slave_w_strb_i           ( master_pulp.w_strb          ),
+      .data_slave_w_user_i           ( master_pulp.w_user          ),
+      .data_slave_w_last_i           ( master_pulp.w_last          ),
+      .data_slave_w_readpointer_o    ( master_pulp.w_readpointer   ),
+      .data_slave_r_writetoken_o     ( master_pulp.r_writetoken    ),
+      .data_slave_r_data_o           ( master_pulp.r_data          ),
+      .data_slave_r_resp_o           ( master_pulp.r_resp          ),
+      .data_slave_r_last_o           ( master_pulp.r_last          ),
+      .data_slave_r_id_o             ( master_pulp.r_id            ),
+      .data_slave_r_user_o           ( master_pulp.r_user          ),
+      .data_slave_r_readpointer_i    ( master_pulp.r_readpointer   ),
+      .data_slave_b_writetoken_o     ( master_pulp.b_writetoken    ),
+      .data_slave_b_resp_o           ( master_pulp.b_resp          ),
+      .data_slave_b_id_o             ( master_pulp.b_id            ),
+      .data_slave_b_user_o           ( master_pulp.b_user          ),
+      .data_slave_b_readpointer_i    ( master_pulp.b_readpointer   ),
+
+      // AXI4 MASTER -- PULPissimo no MASTER NOW
+      .data_master_aw_writetoken_o   (    ),
+      .data_master_aw_addr_o         (    ),
+      .data_master_aw_prot_o         (    ),
+      .data_master_aw_region_o       (    ),
+      .data_master_aw_len_o          (    ),
+      .data_master_aw_size_o         (    ),
+      .data_master_aw_burst_o        (    ),
+      .data_master_aw_lock_o         (    ),
+      .data_master_aw_cache_o        (    ),
+      .data_master_aw_qos_o          (    ),
+      .data_master_aw_id_o           (    ),
+      .data_master_aw_user_o         (    ),
+      .data_master_aw_readpointer_i  ( '0 ),
+      .data_master_ar_writetoken_o   (    ),
+      .data_master_ar_addr_o         (    ),
+      .data_master_ar_prot_o         (    ),
+      .data_master_ar_region_o       (    ),
+      .data_master_ar_len_o          (    ),
+      .data_master_ar_size_o         (    ),
+      .data_master_ar_burst_o        (    ),
+      .data_master_ar_lock_o         (    ),
+      .data_master_ar_cache_o        (    ),
+      .data_master_ar_qos_o          (    ),
+      .data_master_ar_id_o           (    ),
+      .data_master_ar_user_o         (    ),
+      .data_master_ar_readpointer_i  ( '0 ),
+      .data_master_w_writetoken_o    (    ),
+      .data_master_w_data_o          (    ),
+      .data_master_w_strb_o          (    ),
+      .data_master_w_user_o          (    ),
+      .data_master_w_last_o          (    ),
+      .data_master_w_readpointer_i   ( '0 ),
+      .data_master_r_writetoken_i    ( '0 ),
+      .data_master_r_data_i          ( '0 ),
+      .data_master_r_resp_i          ( '0 ),
+      .data_master_r_last_i          ( '0 ),
+      .data_master_r_id_i            ( '0 ),
+      .data_master_r_user_i          ( '0 ),
+      .data_master_r_readpointer_o   (    ),
+      .data_master_b_writetoken_i    ( '0 ),
+      .data_master_b_resp_i          ( '0 ),
+      .data_master_b_id_i            ( '0 ),
+      .data_master_b_user_i          ( '0 ),
+      .data_master_b_readpointer_o   (    ),
+
+      .cluster_events_wt_o           (    ),
+      .cluster_events_rp_i           ( '0 ),
+      .cluster_events_da_o           (    ),
+      .cluster_clk_o                 (    ),
+      .cluster_busy_i                ( '0 ),
+      .dma_pe_evt_ack_o              (    ),
+      .dma_pe_evt_valid_i            ( '0 ),
+      .dma_pe_irq_ack_o              (    ),
+      .dma_pe_irq_valid_i            ( '0 ),
+      .pf_evt_ack_o                  (    ),
+      .pf_evt_valid_i                ( '0 ),
+
+      ///////////////////////////////////////////////////
+      //      To I/O Controller and padframe           //
+      ///////////////////////////////////////////////////
+      .pad_mux_o                     (    ),
+      .pad_cfg_o                     (    ),
+      .gpio_in_i                     ( '0 ),
+      .gpio_out_o                    (    ),
+      .gpio_dir_o                    (    ),
+      .gpio_cfg_o                    (    ),
+      .uart_tx_o                     (    ),
+      .uart_rx_i                     ( '0 ),
+      .cam_clk_i                     ( '0 ),
+      .cam_data_i                    ( '0 ),
+      .cam_hsync_i                   ( '0 ),
+      .cam_vsync_i                   ( '0 ),
+      .timer_ch0_o                   (    ),
+      .timer_ch1_o                   (    ),
+      .timer_ch2_o                   (    ),
+      .timer_ch3_o                   (    ),
+      .i2c0_scl_i                    ( '0 ),
+      .i2c0_scl_o                    (    ),
+      .i2c0_scl_oe_o                 (    ),
+      .i2c0_sda_i                    ( '0 ),
+      .i2c0_sda_o                    (    ),
+      .i2c0_sda_oe_o                 (    ),
+      .i2c1_scl_i                    ( '0 ),
+      .i2c1_scl_o                    (    ),
+      .i2c1_scl_oe_o                 (    ),
+      .i2c1_sda_i                    ( '0 ),
+      .i2c1_sda_o                    (    ),
+      .i2c1_sda_oe_o                 (    ),
+      .i2s_sd0_i                     ( '0 ),
+      .i2s_sd1_i                     ( '0 ),
+      .i2s_sck_i                     ( '0 ),
+      .i2s_ws_i                      ( '0 ),
+      .i2s_sck0_o                    (    ),
+      .i2s_ws0_o                     (    ),
+      .i2s_mode0_o                   (    ),
+      .i2s_sck1_o                    (    ),
+      .i2s_ws1_o                     (    ),
+      .i2s_mode1_o                   (    ),
+      .spi_master0_clk_o             (    ),
+      .spi_master0_csn0_o            (    ),
+      .spi_master0_csn1_o            (    ),
+      .spi_master0_mode_o            (    ),
+      .spi_master0_sdo0_o            (    ),
+      .spi_master0_sdo1_o            (    ),
+      .spi_master0_sdo2_o            (    ),
+      .spi_master0_sdo3_o            (    ),
+      .spi_master0_sdi0_i            ( '0 ),
+      .spi_master0_sdi1_i            ( '0 ),
+      .spi_master0_sdi2_i            ( '0 ),
+      .spi_master0_sdi3_i            ( '0 ),
+      .sdio_clk_o                    (    ),
+      .sdio_cmd_o                    (    ),
+      .sdio_cmd_i                    ( '0 ),
+      .sdio_cmd_oen_o                (    ),
+      .sdio_data_o                   (    ),
+      .sdio_data_i                   ( '0 ),
+      .sdio_data_oen_o               (    ),
+
+    ///////////////////////////////////////////////////
+    ///////////////////////////////////////////////////
+    // From JTAG Tap Controller to axi_dcb module    //
+    ///////////////////////////////////////////////////
+      .jtag_tck_i                    ( '0 ),
+      .jtag_trst_ni                  ( '0 ),
+      .jtag_axireg_tdi_i             ( '0 ),
+      .jtag_axireg_tdo_o             (    ),
+      .jtag_axireg_sel_i             ( '0 ),
+      .jtag_shift_dr_i               ( '0 ),
+      .jtag_update_dr_i              ( '0 ),
+      .jtag_capture_dr_i             ( '0 )
+    );
 
 endmodule

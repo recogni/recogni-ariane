@@ -19,15 +19,16 @@ package ariane_soc;
     localparam ParameterBitwidth = PLICIdWidth;
 
     typedef enum int unsigned {
-        DRAM     = 0,
-        GPIO     = 1,
-        Ethernet = 2,
-        SPI      = 3,
-        UART     = 4,
-        PLIC     = 5,
-        CLINT    = 6,
-        ROM      = 7,
-        Debug    = 8
+        UART     = 0,
+        DRAM     = 1,
+        GPIO     = 2,
+        Ethernet = 3,
+        SPI      = 4,
+        PULP     = 5,
+        PLIC     = 6,
+        CLINT    = 7,
+        ROM      = 8,
+        Debug    = 9
     } axi_slaves_t;
 
     localparam NB_PERIPHERALS = Debug + 1;
@@ -40,8 +41,10 @@ package ariane_soc;
     localparam logic[63:0] SPILength      = 64'h800000;
     localparam logic[63:0] EthernetLength = 64'h10000;
     localparam logic[63:0] GPIOLength     = 64'h1000;
-    localparam logic[63:0] DRAMLength     = 64'h8000000; // 128 MByte of DDR
+    localparam logic[63:0] DRAMLength     = 64'h8000000;  // 128 MByte of DDR
     localparam logic[63:0] SRAMLength     = 64'h1800000;  // 24 MByte of SRAM
+    localparam logic[63:0] PULPLenght     = 64'h10000000; // 256 MByte of address reserved for PULPissimo
+
     // Instantiate AXI protocol checkers
     localparam bit GenProtocolChecker = 1'b0;
 
@@ -50,11 +53,12 @@ package ariane_soc;
         ROMBase      = 64'h0001_0000,
         CLINTBase    = 64'h0200_0000,
         PLICBase     = 64'h0C00_0000,
-        UARTBase     = 64'h1000_0000,
+        PULPBase     = 64'h1000_0000,
         SPIBase      = 64'h2000_0000,
         EthernetBase = 64'h3000_0000,
         GPIOBase     = 64'h4000_0000,
-        DRAMBase     = 64'h8000_0000
+        DRAMBase     = 64'h8000_0000,
+        UARTBase     = 64'h9000_0000
     } soc_bus_start_t;
 
 endpackage
