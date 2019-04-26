@@ -46,3 +46,6 @@
 [submodule "src/rv_plic"]
 	path = src/rv_plic
 	url = https://github.com/pulp-platform/rv_plic.git
+[submodule "tools/edalize"]
+	path = tools/edalize
+	url = https://github.com/olofk/edalize.git
