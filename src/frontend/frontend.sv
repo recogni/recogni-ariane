@@ -42,9 +42,9 @@ module frontend #(
   output icache_dreq_i_t     icache_dreq_o,
   input  icache_dreq_o_t     icache_dreq_i,
   // instruction output port -> to processor back-end
-  output fetch_entry_t       fetch_entry_o,       // fetch entry containing all relevant data for the ID stage
-  output logic               fetch_entry_valid_o, // instruction in IF is valid
-  input  logic               fetch_entry_ready_i  // ID acknowledged this instruction
+  output fetch_entry_t [ariane_pkg::ISSUE_WIDTH-1:0]       fetch_entry_o,       // fetch entry containing all relevant data for the ID stage
+  output logic [ariane_pkg::ISSUE_WIDTH-1:0]               fetch_entry_valid_o, // instruction in IF is valid
+  input  logic [ariane_pkg::ISSUE_WIDTH-1:0]               fetch_entry_ready_i  // ID acknowledged this instruction
 );
     // Instruction Cache Registers, from I$
     logic [FETCH_WIDTH-1:0] icache_data_q;

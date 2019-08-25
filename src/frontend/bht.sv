@@ -106,7 +106,7 @@ module bht #(
     always_comb begin : gen_gshare_index
         gshare_index = realigned_vpc[PREDICTION_BITS - 1:ROW_ADDR_BITS + OFFSET];
         // extend global history register to the length of multiplication of index bits
-        extended_ghr = {{{INDEX_BITS-NR_GLOBAL_HISTORIES_REMAINDER}{1'b1}}, ghr_q};
+        extended_ghr = {{{INDEX_BITS-NR_GLOBAL_HISTORIES_REMAINDER}{1'b0}}, ghr_q};
         for (int unsigned i = 0; i < NR_GLOBAL_HISTORIES; i = i + INDEX_BITS) begin
             gshare_index ^= extended_ghr[i +: INDEX_BITS];
         end
