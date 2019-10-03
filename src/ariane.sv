@@ -410,7 +410,10 @@ module ariane #(
     .icache_areq_o          ( icache_areq_ex_cache        ),
     // DCACHE interfaces
     .dcache_req_ports_i     ( dcache_req_ports_cache_ex   ),
-    .dcache_req_ports_o     ( dcache_req_ports_ex_cache   )
+    .dcache_req_ports_o     ( dcache_req_ports_ex_cache   ),
+    // PMP
+    .pmpcfg_i               ( pmpcfg                      ),
+    .pmpaddr_i              ( pmpaddr                     )
   );
 
   // ---------
