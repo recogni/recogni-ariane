@@ -358,7 +358,7 @@ module mmu #(
                 end else begin
                     // check for sufficient access privileges - throw a page fault if necessary
                     if (daccess_err) begin
-                    lsu_exception_o = {riscv::LOAD_PAGE_FAULT, lsu_vaddr_q, 1'b1};
+                        lsu_exception_o = {riscv::LOAD_PAGE_FAULT, lsu_vaddr_q, 1'b1};
                     // Check if any PMPs are violated
                     end else if (!pmp_data_allow) begin
                         lsu_exception_o = {riscv::LD_ACCESS_FAULT, lsu_paddr_o, 1'b1};
