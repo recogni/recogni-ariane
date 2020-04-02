@@ -11,7 +11,7 @@ export_include_dirs:
 
 sources:
   - defines:
-      WT_DCACHE: 1
+      WT_DCACHE: 0
     files:
     # Packages
     - include/riscv_pkg.sv
