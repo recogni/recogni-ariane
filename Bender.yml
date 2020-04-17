@@ -25,13 +25,14 @@ dependencies:
 workspace:
     checkout_dir: "./deps"
 
+
 export_include_dirs:
   - include/
   - src/util/
 
 sources:
   - defines:
-      WT_DCACHE: 1
+      WT_DCACHE: 0
     files:
         - deps/register_interface/src/reg_intf_pkg.sv            # interface is not defined in Bender dependency! <-- manually adding
         # dependency rv_plic, not benderized

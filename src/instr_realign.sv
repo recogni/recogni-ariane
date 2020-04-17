@@ -102,9 +102,11 @@ module instr_realign (
         end
     // TODO(zarubaf): Fix 64 bit FETCH_WIDTH, maybe generalize to arbitrary fetch width
     end else if (FETCH_WIDTH == 64) begin : realign_bp_64
+        //pragma translate_off
         initial begin
           $error("Not propperly implemented");
         end
+        //pragma translate_on
         always_comb begin : re_align
             unaligned_d = unaligned_q;
             unaligned_address_d = unaligned_address_q;
