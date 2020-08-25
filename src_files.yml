@@ -2,61 +2,80 @@ ariane:
   incdirs: [
     include,
   ]
-  files: [
-    include/riscv_pkg.sv,
-    src/debug/dm_pkg.sv,
-    include/ariane_pkg.sv,
-    include/std_cache_pkg.sv,
-    src/util/instruction_tracer_if.sv,
-    src/util/instruction_tracer_pkg.sv,
-    src/alu.sv,
-    src/ariane.sv,
-    src/branch_unit.sv,
-    src/cache_ctrl.sv,
-    src/commit_stage.sv,
-    src/compressed_decoder.sv,
-    src/controller.sv,
-    src/csr_buffer.sv,
-    src/csr_regfile.sv,
-    src/decoder.sv,
-    src/ex_stage.sv,
-    src/frontend/btb.sv,
-    src/frontend/bht.sv,
-    src/frontend/ras.sv,
-    src/frontend/instr_scan.sv,
-    src/frontend/frontend.sv,
-    src/icache.sv,
-    src/id_stage.sv,
-    src/instr_realigner.sv,
-    src/issue_read_operands.sv,
-    src/issue_stage.sv,
-    src/lfsr.sv,
-    src/load_unit.sv,
-    src/load_store_unit.sv,
-    src/miss_handler.sv,
-    src/mmu.sv,
-    src/mult.sv,
-    src/nbdcache.sv,
-    src/vdregs.sv,
-    src/std_cache_subsystem.sv,
-    src/sram_wrapper.sv,
-    src/pcgen_stage.sv,
-    src/perf_counters.sv,
-    src/ptw.sv,
-    src/re_name.sv,
-    src/scoreboard.sv,
-    src/store_buffer.sv,
-    src/store_unit.sv,
-    src/tlb.sv,
-    src/debug/dm_csrs.sv,
-    src/debug/dm_mem.sv,
-    src/debug/dm_top.sv,
-    src/debug/dmi_cdc.sv,
-    src/debug/dmi_jtag.sv,
-    src/debug/dmi_jtag_tap.sv,
-    fpga/apb_timer/apb_timer.sv,
-    fpga/apb_timer/timer.sv,
-    ]
+  files: 
+        # Ariane sourcefiles
+        # Level 0
+        - include/riscv_pkg.sv
+        - src/ariane_regfile_ff.sv
+        # Level 1
+        - include/ariane_pkg.sv                                     # depends on include/riscv_pkg.sv
+        # Level 2
+        - include/std_cache_pkg.sv                                  # depends on include/ariane_pkg.sv
+        - include/wt_cache_pkg.sv                                   # depends on include/ariane_pkg.sv
+        - src/amo_buffer.sv                                         # depends on include/araine_pkg.sv, common_cells (fifo_v3)
+        - src/alu.sv                                                # depends on include/ariane_pkg.sv
+        - src/commit_stage.sv                                       # depends on include/ariane_pkg.sv
+        - src/compressed_decoder.sv                                 # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/csr_regfile.sv                                        # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/decoder.sv                                            # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/branch_unit.sv                                        # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/controller.sv                                         # depends on include/ariane_pkg.sv
+        - src/csr_buffer.sv                                         # depends on include/ariane_pkg.sv
+        - src/fpu_wrap.sv                                           # depends on include/ariane_pkg.sv, fpnew(fpnew_pkg, fpnew_top)
+        - src/frontend/bht.sv                                       # depends on include/ariane_pkg.sv
+        - src/frontend/btb.sv                                       # depends on include/ariane_pkg.sv, common_cells(unread)
+        - src/frontend/instr_queue.sv                               # depends on include/ariane_pkg.sv, include/riscv_pkg.sv, common_cells(fifo_v3, lzc, popcount, unread)
+        - src/frontend/instr_scan.sv                                # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/frontend/ras.sv                                       # depends on include/ariane_pkg.sv
+        - src/instr_realign.sv                                      # depends on include/ariane_pkg.sv
+        - src/issue_read_operands.sv                                # depends on include/ariane_pkg.sv, include/riscv_pkg.sv, ariane_regfile_ff.sv
+        - src/load_unit.sv                                          # depends on include/ariane_pkg.sv
+        - src/multiplier.sv                                         # depends on include/ariane_pkg.sv
+        - src/perf_counters.sv                                      # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/ptw.sv                                                # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - src/re_name.sv                                            # depends on include/ariane_pkg.sv
+        - src/scoreboard.sv                                         # depends on include/ariane_pkg.sv, common_cells (popcount, rr_arb_tree)
+        - src/serdiv.sv                                             # depends on include/ariane_pkg.sv, common_cells (lzc)
+        - src/store_buffer.sv                                       # depends on include/ariane_pkg.sv
+        - src/tlb.sv                                                # depends on include/ariane_pkg.sv, include/riscv_pkg.sv
+        - tb/ariane_soc_pkg.sv                                      # depends on include/ariane_pkg.sv
+        # Level 3
+        - include/ariane_axi_pkg.sv                                 # depends on tb/ariane_soc_pkg.sv
+        - src/cache_subsystem/amo_alu.sv                            # depends on include/ariane_pkg.sv
+        - src/cache_subsystem/cache_ctrl.sv                         # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv
+        - src/cache_subsystem/tag_cmp.sv                            # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv
+        - src/cache_subsystem/std_icache.sv                         # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv, include/riscv_pkg.sv, common_cells(lsfr_8bit, lzc, sram)
+        - src/cache_subsystem/wt_dcache_ctrl.sv                     # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv
+        - src/cache_subsystem/wt_dcache_mem.sv                      # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, common_cells(lzc, rr_arb_tree, sram)
+        - src/cache_subsystem/wt_dcache_missunit.sv                 # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, common_cells(exp_backoff, lsfr_8bit, lzc)
+        - src/cache_subsystem/wt_dcache_wbuffer.sv                  # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, common_cells(fifo_v3, lzc, rr_arb_tree)
+        - src/cache_subsystem/wt_icache.sv                          # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, common_cells(lfsr_8bit, lzc, sram)
+        - src/cache_subsystem/wt_l15_adapter.sv                     # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, common_cells(fifo_v2, rrarbiter)
+        - src/frontend/frontend.sv                                  # depends on include/ariane_pkg.sv, src/frontend/instr_realign.sv, src/frontend/ras.sv, src/frontend/btb.sv, src/frontend/bht.sv, src/frontend/instr_scan.sv, src/frontend/instr_queue.sv
+        - src/id_stage.sv                                           # depends on include/ariane_pkg.sv, src/compressed_decoder.sv, src/decoder.sv
+        - src/mmu.sv                                                # depends on include/ariane_pkg.sv, include/riscv_pkg.sv, tlb.sv, ptw.sv
+        - src/mult.sv                                               # depends on include/ariane_pkg.sv, src/multiplier.sv, src/serdiv.sv
+        - src/store_unit.sv                                         # depends on include/ariane_pkg.sv, src/store_buffer.sv, src/amo_buffer.sv
+        # Level 4
+        - src/axi_adapter.sv                                        # depends on include/ariane_axi_pkg.sv
+        - src/axi_shim.sv                                           # depends on include/ariane_axi_pkg.sv, std_cache_pkg.sv, axi(axi_pkg)
+        - src/cache_subsystem/wt_dcache.sv                          # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, src/cache_subsystem/wt_dcache_missunit.sv, src/cache_subsystem/wt_dcache_ctrl.sv, wt_dcache_wbuffer.sv, wt_dcache_mem.sv
+        - src/clint/axi_lite_interface.sv                           # depends on include/ariane_axi_pkg.sv
+        - src/load_store_unit.sv                                    # depends on include/ariane_pkg.sv, include/riscv_pkg.sv, mmu.sv, store_unit.sv, load_unit.sv, common_cells(shift_reg)
+        - src/issue_stage.sv                                        # depends on include/ariane_pkg.sv, src/re_name.sv, src/scoreboard.sv, src/issue_read_operands.sv
+        # Level 5
+        - src/cache_subsystem/miss_handler.sv                       # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv, include/ariane_axi_pkg.sv, src/axi_adapter.sv, src/cache_subsystem/amo_alu.sv, common_cells(lfsr_8bit)
+        - src/cache_subsystem/wt_axi_adapter.sv                     # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, src/axi_shim.sv, common_cells(fifo_v3, rr_arb_tree)
+        - src/clint/clint.sv                                        # depends on include/ariane_axi_pkg.sv, src/clint/axi_lite_interface.sv
+        - src/ex_stage.sv                                           # depends on include/ariane_pkg.sv, include/riscv_pkg.sv, src/alu.sv, src/branch_unit.sv, src/csr_buffer.sv, src/mult.sv, src/fpu_wrap.sv, src/load_store_unit.sv
+        # Level 6
+        - src/cache_subsystem/std_nbdcache.sv                       # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv, include/ariane_axi_pkg.sv, src/cache_subsystem/cache_ctrl.sv, src/cache_subsystem/miss_handler.sv, src/cache_subsystem/tag_cmp.sv, common_cells(sram)
+        - src/cache_subsystem/wt_cache_subsystem.sv                 # depends on include/ariane_pkg.sv, include/wt_cache_pkg.sv, src/cache_subsystem/wt_icache.sv, src/cache_subsystem/wt_dcache.sv, src/cache_subsystem/wt_l15_adapter.sv, src/include/wt_axi_adapter.sv
+            # - src/cache_subsystem/std_no_dcache.sv                # depends on include/ariane_pkg.sv, include/ariane_axi_pkg.sv, src/cache_subsystem/amo_alu.sv
+        # Level 7
+        - src/cache_subsystem/std_cache_subsystem.sv                # depends on include/ariane_pkg.sv, include/std_cache_pkg.sv, include/riscv_pkg.sv, include/ariane_axi_pkg.sv, src/cache_subsystem/std_nbdcache.sv, src/cache_subsystem/std_icache.sv, common_cells(fifo_v3, stream_arbiter, stream_demux, stream_mux)
+        # Level 8
+        - src/ariane.sv
 riscv_regfile_rtl:
   targets: [
     rtl,
@@ -78,3 +97,4 @@ riscv_regfile_fpga:
   files: [
     src/ariane_regfile_ff.sv,
   ]
+
