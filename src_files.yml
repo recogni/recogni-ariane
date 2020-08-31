@@ -1,6 +1,7 @@
 ariane:
   incdirs: [
     include,
+    ../axi/include
   ]
   files: 
         # Ariane sourcefiles
