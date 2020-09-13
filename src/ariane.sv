@@ -712,5 +712,6 @@ module ariane #(
     .idx_o   (              )
   );
 `endif // PITON_ARIANE
+//pragma translate_on
 
 endmodule // ariane
