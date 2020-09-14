@@ -4,6 +4,8 @@ ariane:
     ../axi/include
   ]
   files: 
+        - bootrom/bootrom.sv
+
         - deps/register_interface/src/axi_lite_to_reg.sv
         - deps/register_interface/src/axi_to_reg.sv
         - deps/register_interface/src/apb_to_reg.sv
