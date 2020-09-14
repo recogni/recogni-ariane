@@ -1,7 +1,8 @@
 ariane:
   incdirs: [
     include,
-    ../axi/include
+    ../axi/include,
+    ../register_interface/include,
   ]
   files: 
         - bootrom/bootrom.sv
