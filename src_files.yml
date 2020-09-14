@@ -11,7 +11,6 @@ ariane:
         - deps/register_interface/src/axi_to_reg.sv
         - deps/register_interface/src/apb_to_reg.sv
         - deps/register_interface/src/reg_uniform.sv
-        - deps/register_interface/src/reg_test.sv
         - deps/register_interface/src/reg_intf.sv
         - deps/register_interface/src/reg_intf_pkg.sv
         # Ariane sourcefiles
