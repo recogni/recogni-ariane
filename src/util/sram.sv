@@ -18,7 +18,7 @@
 // inferrable RAMS with byte enable. define `FPGA_TARGET_XILINX or
 // `FPGA_TARGET_ALTERA in your build environment (default is ALTERA)
 
-module sram #(
+module ariane_sram #(
     parameter DATA_WIDTH = 64,
     parameter NUM_WORDS  = 1024,
     parameter OUT_REGS   = 0    // enables output registers in FPGA macro (read lat = 2)
@@ -40,38 +40,33 @@ logic [DATA_WIDTH_ALIGNED-1:0]  wdata_aligned;
 logic [BE_WIDTH_ALIGNED-1:0]    be_aligned;
 logic [DATA_WIDTH_ALIGNED-1:0]  rdata_aligned;
 
-// align to 64 bits for inferrable macro below
-always_comb begin : p_align
-    wdata_aligned                    ='0;
-    be_aligned                       ='0;
-    wdata_aligned[DATA_WIDTH-1:0]    = wdata_i;
-    be_aligned[BE_WIDTH_ALIGNED-1:0] = be_i;
 
-    rdata_o = rdata_aligned[DATA_WIDTH-1:0];
+logic [ (((DATA_WIDTH+7)/8)*8) -1:0] sram [0:NUM_WORDS-1];
+
+genvar i;
+
+localparam NUM_BYTES = (DATA_WIDTH+7)/8;
+
+logic [DATA_WIDTH-1:0] bit_enable;
+
+for (i=0; i<DATA_WIDTH;i=i+1) begin
+    assign bit_enable[i] = be_i[i/8];
 end
 
-genvar k;
-generate
-    for (k = 0; k<(DATA_WIDTH+63)/64; k++) begin
-        // unused byte-enable segments (8bits) are culled by the tool
-        SyncSpRamBeNx64 #(
-          .ADDR_WIDTH($clog2(NUM_WORDS)),
-          .DATA_DEPTH(NUM_WORDS),
-          .OUT_REGS (0),
-          // this initializes the memory with 0es. adjust to taste...
-          // 0: no init, 1: zero init, 2: random init, 3: deadbeef init
-          .SIM_INIT (1)
-        ) i_ram (
-           .Clk_CI    ( clk_i                     ),
-           .Rst_RBI   ( rst_ni                    ),
-           .CSel_SI   ( req_i                     ),
-           .WrEn_SI   ( we_i                      ),
-           .BEn_SI    ( be_aligned[k*8 +: 8]      ),
-           .WrData_DI ( wdata_aligned[k*64 +: 64] ),
-           .Addr_DI   ( addr_i                    ),
-           .RdData_DO ( rdata_aligned[k*64 +: 64] )
-        );
+always @(posedge clk_i) begin
+    if ( (rst_ni == 1) && (we_i) && (req_i) ) begin
+        for (integer j=0; j<DATA_WIDTH;j=j+1) begin
+            if (bit_enable[j]) begin
+                 sram[addr_i][j] <= wdata_i[j];
+            end
+        end
     end
-endgenerate
+
+    if ( (rst_ni == 1) && (!we_i) && (req_i) ) begin
+        rdata_o <= sram[addr_i];
+    end
+
+end
+
 
 endmodule : sram

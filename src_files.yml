@@ -13,6 +13,8 @@ ariane:
         - deps/register_interface/src/reg_uniform.sv
         - deps/register_interface/src/reg_intf.sv
         - deps/register_interface/src/reg_intf_pkg.sv
+
+        - src/util/sram.sv
         # Ariane sourcefiles
         # Level 0
         - include/riscv_pkg.sv

@@ -254,7 +254,7 @@ module wt_dcache_mem #(
 
   for (genvar k = 0; k < DCACHE_NUM_BANKS; k++) begin : gen_data_banks
     // Data RAM
-    sram #(
+    ariane_sram #(
       .DATA_WIDTH ( ariane_pkg::DCACHE_SET_ASSOC * 64 ),
       .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS    )
     ) i_data_sram (
@@ -275,7 +275,7 @@ module wt_dcache_mem #(
     assign rd_vld_bits_o[i] = vld_tag_rdata[i][DCACHE_TAG_WIDTH];
 
     // Tag RAM
-    sram #(
+    ariane_sram #(
       // tag + valid bit
       .DATA_WIDTH ( ariane_pkg::DCACHE_TAG_WIDTH + 1 ),
       .NUM_WORDS  ( wt_cache_pkg::DCACHE_NUM_WORDS   )
