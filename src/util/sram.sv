@@ -18,7 +18,7 @@
 // inferrable RAMS with byte enable. define `FPGA_TARGET_XILINX or
 // `FPGA_TARGET_ALTERA in your build environment (default is ALTERA)
 
-module ariane_sram #(
+module sram_foo #(
     parameter DATA_WIDTH = 64,
     parameter NUM_WORDS  = 1024,
     parameter OUT_REGS   = 0    // enables output registers in FPGA macro (read lat = 2)

@@ -77,7 +77,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
         // ------------
         // Tag RAM
         // ------------
-        ariane_sram #(
+        sram_brcm #(
             // tag + valid bit
             .DATA_WIDTH ( ICACHE_TAG_WIDTH + 1   ),
             .NUM_WORDS  ( ICACHE_NUM_WORD )
@@ -94,7 +94,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
         // ------------
         // Data RAM
         // ------------
-        ariane_sram #(
+        sram_brcm #(
             .DATA_WIDTH ( ICACHE_LINE_WIDTH ),
             .NUM_WORDS  ( ICACHE_NUM_WORD   )
         ) data_sram (

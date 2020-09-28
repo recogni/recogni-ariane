@@ -379,7 +379,7 @@ package ariane_pkg;
 
 
 `ifndef CONFIG_L1I_CACHELINE_WIDTH
-    `define CONFIG_L1I_CACHELINE_WIDTH 256
+    `define CONFIG_L1I_CACHELINE_WIDTH 128
 `endif
 
 `ifndef CONFIG_L1I_ASSOCIATIVITY
@@ -387,19 +387,19 @@ package ariane_pkg;
 `endif
 
 `ifndef CONFIG_L1I_SIZE
-    `define CONFIG_L1I_SIZE 32*1024
+    `define CONFIG_L1I_SIZE 16*1024
 `endif
 
 `ifndef CONFIG_L1D_CACHELINE_WIDTH
-    `define CONFIG_L1D_CACHELINE_WIDTH 256
+    `define CONFIG_L1D_CACHELINE_WIDTH 128
 `endif
 
 `ifndef CONFIG_L1D_ASSOCIATIVITY
-    `define CONFIG_L1D_ASSOCIATIVITY 8
+    `define CONFIG_L1D_ASSOCIATIVITY 4
 `endif
 
 `ifndef CONFIG_L1D_SIZE
-    `define CONFIG_L1D_SIZE 32*1024
+    `define CONFIG_L1D_SIZE 16*1024
 `endif
 
     // I$

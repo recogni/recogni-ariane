@@ -161,7 +161,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
     // Memory Arrays
     // --------------
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin : sram_block
-        ariane_sram #(
+        sram_brcm #(
             .DATA_WIDTH ( DCACHE_LINE_WIDTH                 ),
             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
         ) data_sram (
@@ -175,7 +175,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
             .*
         );
 
-        ariane_sram #(
+        sram_brcm #(
             .DATA_WIDTH ( DCACHE_TAG_WIDTH                  ),
             .NUM_WORDS  ( DCACHE_NUM_WORDS                  )
         ) tag_sram (
@@ -207,7 +207,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
         assign rdata_ram[i].valid = dirty_rdata[8*i+1];
     end
 
-    ariane_sram #(
+    sram_brcm #(
         .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
         .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
     ) valid_dirty_sram (

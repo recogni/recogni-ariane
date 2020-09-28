@@ -439,7 +439,7 @@ end else begin : gen_piton_offset
 
   for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : gen_sram
     // Tag RAM
-    ariane_sram #(
+    sram_brcm #(
       // tag + valid bit
       .DATA_WIDTH ( ICACHE_TAG_WIDTH+1 ),
       .NUM_WORDS  ( ICACHE_NUM_WORDS   )
@@ -460,7 +460,7 @@ end else begin : gen_piton_offset
     assign vld_rdata[i]    = cl_tag_valid_rdata[i][ICACHE_TAG_WIDTH];
 
     // Data RAM
-    ariane_sram #(
+    sram_brcm #(
       .DATA_WIDTH ( ICACHE_LINE_WIDTH ),
       .NUM_WORDS  ( ICACHE_NUM_WORDS  )
     ) data_sram (
