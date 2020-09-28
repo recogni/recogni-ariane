@@ -1,6 +1,7 @@
 ariane:
   incdirs: [
     include,
+    src/util,
     ../../axi/include,
     ../register_interface/include,
   ]
@@ -23,6 +24,9 @@ ariane:
         - include/ariane_pkg.sv                                     # depends on include/riscv_pkg.sv
         # Level 2
         - include/std_cache_pkg.sv                                  # depends on include/ariane_pkg.sv
+        - src/util/instr_tracer_if.sv
+        - include/instr_tracer_pkg.sv
+        - src/util/instr_tracer.sv
         - include/wt_cache_pkg.sv                                   # depends on include/ariane_pkg.sv
         - src/amo_buffer.sv                                         # depends on include/araine_pkg.sv, common_cells (fifo_v3)
         - src/alu.sv                                                # depends on include/ariane_pkg.sv
