@@ -19,6 +19,7 @@ module ariane #(
 ) (
   input  logic                         clk_i,
   input  logic                         rst_ni,
+  input  logic                         test_rst_i,
   // Core ID, Cluster ID and boot address are considered more or less static
   input  logic [63:0]                  boot_addr_i,  // reset boot address
   input  logic [63:0]                  hart_id_i,    // hart id in a multicore environment (reflected in a CSR)
@@ -588,6 +589,7 @@ module ariane #(
     // to D$
     .clk_i                 ( clk_i                       ),
     .rst_ni                ( rst_ni                      ),
+    .test_rst_i            ( test_rst_i                  ),
     // I$
     .icache_en_i           ( icache_en_csr               ),
     .icache_flush_i        ( icache_flush_ctrl_cache     ),
@@ -629,6 +631,7 @@ module ariane #(
     // to D$
     .clk_i                 ( clk_i                       ),
     .rst_ni                ( rst_ni                      ),
+    .test_rst_i            ( test_rst_i                  ),
     .priv_lvl_i            ( priv_lvl                    ),
     // I$
     .icache_en_i           ( icache_en_csr               ),
