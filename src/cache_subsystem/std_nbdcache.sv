@@ -201,28 +201,33 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
     // align each valid/dirty bit pair to a byte boundary in order to leverage byte enable signals.
     // note: if you have an SRAM that supports flat bit enables for your target technology,
     // you can use it here to save the extra 4x overhead introduced by this workaround.
-    logic [4*DCACHE_DIRTY_WIDTH-1:0] dirty_wdata, dirty_rdata;
+    logic [DCACHE_DIRTY_WIDTH-1:0] dirty_wdata, dirty_rdata;
 
     for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin
-        assign dirty_wdata[8*i]   = wdata_ram.dirty;
-        assign dirty_wdata[8*i+1] = wdata_ram.valid;
-        assign rdata_ram[i].dirty = dirty_rdata[8*i];
-        assign rdata_ram[i].valid = dirty_rdata[8*i+1];
+        assign dirty_wdata[2*i]   = wdata_ram.dirty;
+        assign dirty_wdata[2*i+1] = wdata_ram.valid;
+        assign rdata_ram[i].dirty = dirty_rdata[2*i];
+        assign rdata_ram[i].valid = dirty_rdata[2*i+1];
     end
 
-    sram_brcm #(
-        .DATA_WIDTH ( 4*DCACHE_DIRTY_WIDTH             ),
+    logic [DCACHE_DIRTY_WIDTH-1:0] valid_dirty_bite;
+    for (genvar i = 0; i < DCACHE_SET_ASSOC; i++) begin
+        assign valid_dirty_bite[(i+1)*2-1:(i*2)] = {2{be_ram.vldrty[i]}};
+    end
+
+    sram_ff #(
+        .DATA_WIDTH ( DCACHE_DIRTY_WIDTH               ),
         .NUM_WORDS  ( DCACHE_NUM_WORDS                 )
     ) valid_dirty_sram (
-        .clk_i   ( clk_i                               ),
-        .rst_ni  ( rst_ni                              ),
-        .test_rst_i ( test_rst_i                       ),
-        .req_i   ( |req_ram                            ),
-        .we_i    ( we_ram                              ),
-        .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
-        .wdata_i ( dirty_wdata                         ),
-        .be_i    ( be_ram.vldrty                       ),
-        .rdata_o ( dirty_rdata                         )
+        .clk_i      ( clk_i                               ),
+        .rst_ni     ( rst_ni                              ),
+        .test_rst_i ( test_rst_i                          ),
+        .req_i      ( |req_ram                            ),
+        .we_i       ( we_ram                              ),
+        .addr_i     ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),
+        .wdata_i    ( dirty_wdata                         ),
+        .bite_i     ( valid_dirty_bite                    ),
+        .rdata_o    ( dirty_rdata                         )
     );
 
     // ------------------------------------------------
