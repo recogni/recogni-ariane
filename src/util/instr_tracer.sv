@@ -12,13 +12,14 @@
 // Date: 16.05.2017
 // Description: Instruction Tracer Main Class
 
+
+
 `ifndef VERILATOR
 //pragma translate_off
 import uvm_pkg::*;
 `include "uvm_macros.svh"
 `include "ex_trace_item.svh"
 `include "instr_trace_item.svh"
-//pragma translate_on
 
 module instr_tracer (
   instr_tracer_if   tracer_if,
@@ -185,7 +186,6 @@ module instr_tracer (
     bp              = {};
   endfunction
 
-  // pragma translate_off
   function void printInstr(ariane_pkg::scoreboard_entry_t sbe, logic [31:0] instr, logic [63:0] result, logic [riscv::PLEN-1:0] paddr, riscv::priv_lvl_t priv_lvl, logic debug_mode, ariane_pkg::bp_resolve_t bp);
     automatic instr_trace_item iti = new ($time, clk_ticks, sbe, instr, gp_reg_file, fp_reg_file, result, paddr, priv_lvl, debug_mode, bp);
     // print instruction to console
@@ -219,7 +219,8 @@ module instr_tracer (
   final begin
     close();
   end
-  // pragma translate_on
-
 endmodule : instr_tracer
+
+// pragma translate_on
 `endif
+
