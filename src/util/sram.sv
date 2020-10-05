@@ -69,4 +69,4 @@ always @(posedge clk_i) begin
 end
 
 
-endmodule : sram
+endmodule : sram_foo
