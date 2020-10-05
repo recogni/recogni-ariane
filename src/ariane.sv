@@ -737,7 +737,7 @@ module ariane #(
 //pragma translate_on
 
 `ifndef VERILATOR
-  // synthesis translate off
+  // pragma translate_off
 
   instr_tracer_if tracer_if (clk_i);
   // assign instruction tracer interface
@@ -781,7 +781,7 @@ module ariane #(
     .hart_id_i
   );
 
-  // synthesis translate on
+  // pragma translate_on
 
 // mock tracer for Verilator, to be used with spike-dasm
 `else
