@@ -17,7 +17,8 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
 )(
     input  logic                           clk_i,       // Clock
     input  logic                           rst_ni,      // Asynchronous reset active low
-    input  logic                           test_rst_i,
+    input  logic                           test_early_rst_i,
+    input  logic                           test_late_rst_i,
     // Cache management
     input  logic                           enable_i,    // from CSR
     input  logic                           flush_i,     // high until acknowledged
@@ -168,7 +169,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
         ) data_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
-            .test_rst_i ( test_rst_i                        ),
+            .test_rst_i ( test_late_rst_i                   ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wdata_i ( wdata_ram.data                       ),
@@ -183,7 +184,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
         ) tag_sram (
             .req_i   ( req_ram [i]                          ),
             .rst_ni  ( rst_ni                               ),
-            .test_rst_i ( test_rst_i                        ),
+            .test_rst_i ( test_late_rst_i                   ),
             .we_i    ( we_ram                               ),
             .addr_i  ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET]  ),
             .wdata_i ( wdata_ram.tag                        ),
@@ -221,7 +222,7 @@ module std_nbdcache import ariane_pkg::*; import std_cache_pkg::* ;#(
     ) valid_dirty_sram (
         .clk_i      ( clk_i                               ),
         .rst_ni     ( rst_ni                              ),
-        .test_rst_i ( test_rst_i                          ),
+        .test_rst_i ( test_late_rst_i                     ),
         .req_i      ( |req_ram                            ),
         .we_i       ( we_ram                              ),
         .addr_i     ( addr_ram[DCACHE_INDEX_WIDTH-1:DCACHE_BYTE_OFFSET] ),

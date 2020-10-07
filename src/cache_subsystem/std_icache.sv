@@ -17,7 +17,8 @@
 module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
     input  logic                     clk_i,
     input  logic                     rst_ni,
-    input  logic                     test_rst_i,
+    input  logic                     test_early_rst_i,
+    input  logic                     test_late_rst_i,
     input riscv::priv_lvl_t          priv_lvl_i,
 
     input  logic                     flush_i,          // flush the icache, flush and kill have to be asserted together
@@ -85,7 +86,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
         ) tag_sram (
             .clk_i     ( clk_i            ),
             .rst_ni    ( rst_ni           ),
-            .test_rst_i( test_rst_i       ),
+            .test_rst_i( test_early_rst_i ),
             .req_i     ( vld_req[i]       ),
             .we_i      ( we               ),
             .addr_i    ( addr             ),
@@ -102,7 +103,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
         ) data_sram (
             .clk_i     ( clk_i              ),
             .rst_ni    ( rst_ni             ),
-            .test_rst_i( test_rst_i         ),
+            .test_rst_i( test_early_rst_i   ),
             .req_i     ( req[i]             ),
             .we_i      ( we                 ),
             .addr_i    ( addr               ),
