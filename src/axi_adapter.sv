@@ -69,7 +69,7 @@ module axi_adapter #(
             addr:    addr_i,
          // len:     8'b0,
             size:    {1'b0, size_i},
-            burst:   (type_i == ariane_axi::SINGLE_REQ) ? (axi_pkg::BURST_FIXED) : (axi_pkg::BURST_INCR), // (Tempfix as FIXED and INCR with LEN = 0 are the same)
+            burst:   (type_i == ariane_axi::SINGLE_REQ) ? (axi_pkg::BURST_INCR) : (axi_pkg::BURST_INCR), // (Tempfix as FIXED and INCR with LEN = 0 are the same)
          // lock:    1'b0,
          // cache:   4'b0,
          // prot:    3'b0,
@@ -88,7 +88,7 @@ module axi_adapter #(
             addr:    (CRITICAL_WORD_FIRST || type_i == ariane_axi::SINGLE_REQ) ? addr_i : { addr_i[63:CACHELINE_BYTE_OFFSET], {{CACHELINE_BYTE_OFFSET}{1'b0}}},
          // len:     8'b0,
             size:    {1'b0, size_i},
-            burst:   (type_i == ariane_axi::SINGLE_REQ) ? (axi_pkg::BURST_FIXED) : (CRITICAL_WORD_FIRST ? (axi_pkg::BURST_WRAP) : (axi_pkg::BURST_INCR)),
+            burst:   (type_i == ariane_axi::SINGLE_REQ) ? (axi_pkg::BURST_INCR) : (CRITICAL_WORD_FIRST ? (axi_pkg::BURST_WRAP) : (axi_pkg::BURST_INCR)),
          // lock:    1'b0,
          // cache:   4'b0,
          // prot:    3'b0,
