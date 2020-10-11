@@ -66,6 +66,10 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
     logic                                 repl_w_random; // we need to switch repl strategy since all are valid
     logic [ICACHE_TAG_WIDTH-1:0]          tag;           // tag to do comparison with
 
+    // icache bypass 
+    logic [(ICACHE_LINE_WIDTH-1):0]       icache_bypass_d;  // data register to hold icache data during icache disable
+    logic [ICACHE_TAG_WIDTH-1:0]          icache_bypass_tag;
+
     // tag + valid bit read/write data
     struct packed {
         logic                 valid;
@@ -87,7 +91,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
             .clk_i     ( clk_i            ),
             .rst_ni    ( rst_ni           ),
             .test_rst_i( test_early_rst_i ),
-            .req_i     ( vld_req[i]       ),
+            .req_i     ( vld_req[i] && en_i ),
             .we_i      ( we               ),
             .addr_i    ( addr             ),
             .wdata_i   ( tag_wdata        ),
@@ -104,7 +108,7 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
             .clk_i     ( clk_i              ),
             .rst_ni    ( rst_ni             ),
             .test_rst_i( test_early_rst_i   ),
-            .req_i     ( req[i]             ),
+            .req_i     ( req[i]  && en_i    ),
             .we_i      ( we                 ),
             .addr_i    ( addr               ),
             .wdata_i   ( data_wdata         ),
@@ -124,8 +128,8 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
 
     generate
         for (genvar i = 0; i < ICACHE_SET_ASSOC; i++) begin : g_tag_cmpsel
-            assign hit[i] = (tag_rdata[i].tag == tag) ? tag_rdata[i].valid : 1'b0;
-            assign cl_sel[i] = (hit[i]) ? data_rdata[i][{idx, 5'b0} +: FETCH_WIDTH] : '0;
+            assign hit[i] = en_i ? ((tag_rdata[i].tag == tag) ? tag_rdata[i].valid : 1'b0) : (icache_bypass_tag == tag && i == 0);
+            assign cl_sel[i] = en_i ? ((hit[i]) ? data_rdata[i][{idx, 5'b0} +: FETCH_WIDTH] : '0 ) : icache_bypass_d[{idx, 5'b0} +: FETCH_WIDTH];
             assign way_valid[i] = tag_rdata[i].valid;
         end
     endgenerate
@@ -440,6 +444,29 @@ module std_icache import ariane_pkg::*; import std_cache_pkg::*; (
             evict_way_q <= evict_way_d;
             flushing_q  <= flushing_d;
             burst_cnt_q <= burst_cnt_d;
+        end
+    end
+
+    // Bypass storage
+    for (genvar i=0;i<((ICACHE_LINE_WIDTH+7)/8);i++) begin : ICACHE_BYPASS
+         always_ff @(posedge clk_i) begin
+            if ( rst_ni == 1'b0) begin
+                icache_bypass_d[(i+1)*8-1:(i*8)] <= '0;
+            end else begin 
+                if ( we==1'b1 && data_be[i]==1'b1 && en_i==1'b0 ) begin
+                    icache_bypass_d[(i+1)*8-1:(i*8)] <= data_wdata[(i+1)*8-1:(i*8)];
+                end
+            end
+        end
+    end
+
+    always_ff @(posedge clk_i) begin
+        if ( rst_ni == 1'b0 ) begin
+            icache_bypass_tag <= '0;
+        end else begin 
+            if ( we==1'b1 && en_i==1'b0) begin
+                icache_bypass_tag <= tag_wdata;
+            end
         end
     end
 
